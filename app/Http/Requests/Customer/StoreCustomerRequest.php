@@ -16,8 +16,10 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
+            'company_name' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255', Rule::unique('customers', 'email')],
             'phone' => ['nullable', 'string', 'max:50'],
+            'currency' => ['required', 'string', 'size:3'],
             'address_line_1' => ['nullable', 'string', 'max:255'],
             'address_line_2' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],

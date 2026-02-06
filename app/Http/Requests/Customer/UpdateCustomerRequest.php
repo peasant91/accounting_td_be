@@ -18,6 +18,7 @@ class UpdateCustomerRequest extends FormRequest
 
         return [
             'name' => ['sometimes', 'required', 'string', 'max:100'],
+            'company_name' => ['nullable', 'string', 'max:100'],
             'email' => [
                 'sometimes',
                 'required',
@@ -26,6 +27,7 @@ class UpdateCustomerRequest extends FormRequest
                 Rule::unique('customers', 'email')->ignore($customerId),
             ],
             'phone' => ['nullable', 'string', 'max:50'],
+            'currency' => ['sometimes', 'required', 'string', 'size:3'],
             'address_line_1' => ['nullable', 'string', 'max:255'],
             'address_line_2' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],

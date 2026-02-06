@@ -14,8 +14,10 @@ class CustomerCollection extends ResourceCollection
                 return [
                     'id' => $customer->id,
                     'name' => $customer->name,
+                    'company_name' => $customer->company_name,
                     'email' => $customer->email,
                     'phone' => $customer->phone,
+                    'currency' => $customer->currency,
                     'total_receivable' => (float) $customer->total_receivable,
                     'status' => $customer->status?->value ?? $customer->status,
                 ];

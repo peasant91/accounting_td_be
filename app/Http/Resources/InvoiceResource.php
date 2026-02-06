@@ -13,6 +13,7 @@ class InvoiceResource extends JsonResource
             'id' => $this->id,
             'invoice_number' => $this->invoice_number,
             'customer_id' => $this->customer_id,
+            'currency' => $this->currency,
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'invoice_date' => $this->invoice_date?->format('Y-m-d'),
             'due_date' => $this->due_date?->format('Y-m-d'),

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceSequence;
@@ -59,6 +60,10 @@ class InvoiceService
     public function create(array $data): Invoice
     {
         return DB::transaction(function () use ($data) {
+            // Get customer currency
+            $customer = Customer::findOrFail($data['customer_id']);
+            $currency = $customer->currency ?? 'IDR';
+
             // Generate invoice number
             $year = now()->year;
             $invoiceNumber = InvoiceSequence::getNextNumber($year);
@@ -66,6 +71,7 @@ class InvoiceService
             // Create invoice
             $invoice = Invoice::create([
                 'customer_id' => $data['customer_id'],
+                'currency' => $currency,
                 'invoice_number' => $invoiceNumber,
                 'invoice_date' => $data['invoice_date'],
                 'due_date' => $data['due_date'],

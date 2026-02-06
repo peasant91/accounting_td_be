@@ -16,6 +16,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id',
+        'currency',
         'invoice_number',
         'invoice_date',
         'due_date',
