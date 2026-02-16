@@ -4,13 +4,15 @@ namespace App\Models;
 
 use App\Enums\CustomerStatus;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use SoftDeletes, HasActivityLog;
+    use HasFactory, SoftDeletes, HasActivityLog;
 
     protected $fillable = [
         'name',
@@ -73,5 +75,12 @@ class Customer extends Model
                 ->orWhere('email', 'like', "%{$search}%")
                 ->orWhere('phone', 'like', "%{$search}%");
         });
+    }
+    /**
+     * Get the invoice template for the customer.
+     */
+    public function invoiceTemplate(): HasOne
+    {
+        return $this->hasOne(InvoiceTemplate::class);
     }
 }

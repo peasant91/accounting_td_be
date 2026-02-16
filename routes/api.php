@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvoiceTemplateController;
 use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,11 @@ Route::prefix('v1')->group(function () {
 
     // Customers
     Route::apiResource('customers', CustomerController::class);
+
+    // Invoice Templates
+    Route::get('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'show']);
+    Route::put('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'update']);
+    Route::get('/customers/{customer}/invoice-template/preview', [InvoiceTemplateController::class, 'preview']);
 
     // Invoices
     Route::apiResource('invoices', InvoiceController::class);
