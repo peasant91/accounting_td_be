@@ -11,6 +11,7 @@ return [
         ['key' => 'grand_total', 'label' => 'Grand Total', 'enabled' => true, 'required' => false],
         ['key' => 'bank_transfer', 'label' => 'Bank Transfer Information', 'enabled' => true, 'required' => false],
         ['key' => 'transfer_fee_note', 'label' => 'Transfer Fee Note', 'enabled' => true, 'required' => false],
+        ['key' => 'unique_number', 'label' => 'Unique Number Indicator', 'enabled' => true, 'required' => false],
     ],
 
     'currency_locale_map' => [
