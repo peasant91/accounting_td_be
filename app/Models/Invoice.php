@@ -35,6 +35,7 @@ class Invoice extends Model
         'payment_method',
         'payment_reference',
         'payment_notes',
+        'payment_proof_path',
     ];
 
     protected $casts = [

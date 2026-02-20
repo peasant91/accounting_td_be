@@ -176,12 +176,18 @@ class InvoiceService
      */
     public function markAsPaid(Invoice $invoice, array $data): Invoice
     {
+        $paymentProofPath = null;
+        if (isset($data['payment_proof'])) {
+            $paymentProofPath = $data['payment_proof']->store('proofs', 'public');
+        }
+
         $invoice->update([
             'status' => InvoiceStatus::Paid,
             'payment_date' => $data['payment_date'],
             'payment_method' => $data['payment_method'] ?? null,
             'payment_reference' => $data['payment_reference'] ?? null,
             'payment_notes' => $data['notes'] ?? null,
+            'payment_proof_path' => $paymentProofPath,
         ]);
 
         $invoice->logActivity('marked_as_paid', [
