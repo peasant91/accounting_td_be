@@ -30,6 +30,7 @@ class InvoiceResource extends JsonResource
             'payment_date' => $this->payment_date?->format('Y-m-d'),
             'payment_method' => $this->payment_method?->value ?? $this->payment_method,
             'payment_reference' => $this->payment_reference,
+            'payment_proof_url' => $this->payment_proof_path ? \Illuminate\Support\Facades\Storage::url($this->payment_proof_path) : null,
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
             'available_actions' => $this->available_actions,
             'created_at' => $this->created_at?->toISOString(),
