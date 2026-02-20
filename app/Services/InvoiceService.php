@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Enums\InvoiceType;
 use App\Models\InvoiceSequence;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -45,6 +46,11 @@ class InvoiceService
             $query->dateRange($request->due_date_from, $request->due_date_to, 'due_date');
         }
 
+        // Filter by type
+        if ($request->has('type') && $request->type) {
+            $query->where('type', $request->type);
+        }
+
         // Default ordering
         $query->orderBy('created_at', 'desc');
 
@@ -79,6 +85,8 @@ class InvoiceService
                 'notes' => $data['notes'] ?? null,
                 'internal_notes' => $data['internal_notes'] ?? null,
                 'status' => InvoiceStatus::Draft,
+                'type' => $data['type'] ?? InvoiceType::Manual,
+                'recurring_invoice_id' => $data['recurring_invoice_id'] ?? null,
             ]);
 
             // Create items

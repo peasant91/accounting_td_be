@@ -19,6 +19,7 @@ class DashboardService
             'total_receivables' => $this->getTotalReceivables(),
             'total_customers' => $this->getTotalCustomers(),
             'invoices_due_this_month' => $this->getInvoicesDueThisMonth(),
+            'recurring_invoices' => $this->getRecurringInvoicesSummary(),
             'recent_activity' => $this->getRecentActivity(),
         ];
     }
@@ -60,6 +61,40 @@ class DashboardService
         return [
             'count' => $invoices->count(),
             'amount' => (float) $invoices->sum('total'),
+        ];
+    }
+
+    /**
+     * Get recurring invoices summary.
+     */
+    public function getRecurringInvoicesSummary(): array
+    {
+        // Generated today
+        $generatedToday = Invoice::where('type', \App\Enums\InvoiceType::Recurring)
+            ->whereDate('created_at', now()->today())
+            ->count();
+
+        // Upcoming in next 7 days
+        $upcoming = \App\Models\RecurringInvoice::where('status', 'active')
+            ->where('recurrence_type', '!=', \App\Enums\RecurrenceType::Manual)
+            ->whereDate('next_invoice_date', '>=', now()->today())
+            ->whereDate('next_invoice_date', '<=', now()->today()->addDays(7))
+            ->with('customer')
+            ->orderBy('next_invoice_date', 'asc')
+            ->get()
+            ->map(function ($inv) {
+                return [
+                    'id' => $inv->id,
+                    'customer_id' => $inv->customer_id,
+                    'customer_name' => $inv->customer->name,
+                    'title' => $inv->title,
+                    'next_invoice_date' => $inv->next_invoice_date?->toDateString(),
+                ];
+            });
+
+        return [
+            'generated_today' => $generatedToday,
+            'upcoming' => $upcoming,
         ];
     }
 

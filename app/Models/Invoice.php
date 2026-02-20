@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\InvoiceType;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,8 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id',
+        'recurring_invoice_id',
+        'type',
         'currency',
         'invoice_number',
         'invoice_date',
@@ -39,6 +42,7 @@ class Invoice extends Model
         'due_date' => 'date',
         'payment_date' => 'date',
         'status' => InvoiceStatus::class,
+        'type' => InvoiceType::class,
         'payment_method' => PaymentMethod::class,
         'subtotal' => 'decimal:2',
         'tax_rate' => 'decimal:2',
@@ -52,6 +56,14 @@ class Invoice extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Get the recurring invoice that generated this invoice.
+     */
+    public function recurringInvoice(): BelongsTo
+    {
+        return $this->belongsTo(RecurringInvoice::class);
     }
 
     /**

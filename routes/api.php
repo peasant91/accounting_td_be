@@ -22,9 +22,15 @@ Route::prefix('v1')->group(function () {
     // Invoices
     Route::apiResource('invoices', InvoiceController::class);
     Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send']);
+    // ... existing invoice routes ...
     Route::post('/invoices/{invoice}/resend', [InvoiceController::class, 'resend']);
     Route::post('/invoices/{invoice}/send-reminder', [InvoiceController::class, 'sendReminder']);
     Route::post('/invoices/{invoice}/mark-as-paid', [InvoiceController::class, 'markAsPaid']);
     Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
+
+    // Recurring Invoices
+    Route::get('/customers/{customer}/recurring-invoices', [\App\Http\Controllers\RecurringInvoiceController::class, 'index']);
+    Route::post('/recurring-invoices/{recurringInvoice}/generate', [\App\Http\Controllers\RecurringInvoiceController::class, 'manualGenerate']);
+    Route::apiResource('recurring-invoices', \App\Http\Controllers\RecurringInvoiceController::class)->except(['index', 'create', 'edit']);
 });

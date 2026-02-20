@@ -83,4 +83,11 @@ class Customer extends Model
     {
         return $this->hasOne(InvoiceTemplate::class);
     }
+    /**
+     * Get the recurring invoices for the customer.
+     */
+    public function recurringInvoices(): HasMany
+    {
+        return $this->hasMany(RecurringInvoice::class);
+    }
 }

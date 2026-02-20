@@ -17,7 +17,7 @@ class UpdateInvoiceRequest extends FormRequest
         return [
             'customer_id' => ['sometimes', 'required', 'exists:customers,id'],
             'invoice_date' => ['sometimes', 'required', 'date'],
-            'due_date' => ['sometimes', 'required', 'date', 'after_or_equal:invoice_date'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:invoice_date'],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'notes' => ['nullable', 'string', 'max:500'],
             'internal_notes' => ['nullable', 'string', 'max:500'],
