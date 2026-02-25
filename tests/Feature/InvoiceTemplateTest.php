@@ -48,7 +48,7 @@ class InvoiceTemplateTest extends TestCase
             ]);
 
         // Validating default component count (9)
-        $this->assertCount(9, $response->json('data.components'));
+        $this->assertCount(11, $response->json('data.components'));
     }
 
     public function test_create_new_invoice_template()

@@ -13,7 +13,7 @@ class InvoiceTemplateServiceTest extends TestCase
         $components = $service->getDefaultComponents();
 
         $this->assertIsArray($components);
-        $this->assertCount(9, $components);
+        $this->assertCount(11, $components);
         $this->assertEquals('company_header', $components[0]['key']);
     }
 
