@@ -10,6 +10,7 @@ use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceCollection;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Services\InvoicePdfService;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -154,9 +155,10 @@ class InvoiceController extends Controller
      */
     public function downloadPdf(Invoice $invoice)
     {
-        // TODO: Implement PDF generation
-        return response()->json([
-            'message' => 'PDF generation not yet implemented',
-        ], 501);
+        $pdfService = app(InvoicePdfService::class);
+        $pdf = $pdfService->generate($invoice);
+        $filename = "Invoice-{$invoice->invoice_number}.pdf";
+
+        return $pdf->download($filename);
     }
 }

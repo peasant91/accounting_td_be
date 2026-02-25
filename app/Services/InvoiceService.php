@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -153,8 +154,12 @@ class InvoiceService
             'subject' => $data['subject'],
         ]);
 
-        // TODO: Dispatch job to send email
-        // SendInvoiceEmailJob::dispatch($invoice, $data);
+        SendInvoiceEmailJob::dispatch(
+            invoice: $invoice,
+            recipientEmail: $data['recipient_email'],
+            subject: $data['subject'],
+            messageBody: $data['message'] ?? null,
+        );
     }
 
     /**
@@ -167,8 +172,12 @@ class InvoiceService
             'subject' => $data['subject'],
         ]);
 
-        // TODO: Dispatch job to send reminder email
-        // SendReminderEmailJob::dispatch($invoice, $data);
+        SendInvoiceEmailJob::dispatch(
+            invoice: $invoice,
+            recipientEmail: $data['recipient_email'],
+            subject: $data['subject'],
+            messageBody: $data['message'] ?? null,
+        );
     }
 
     /**
