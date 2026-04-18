@@ -33,6 +33,7 @@ class RecurringInvoice extends Model
         'due_date_offset',
         'notes',
         'last_generated_at',
+        'last_attempted_at',
     ];
 
     protected $casts = [
@@ -48,6 +49,7 @@ class RecurringInvoice extends Model
         'generated_count' => 'integer',
         'tax_rate' => 'decimal:2',
         'due_date_offset' => 'integer',
+        'last_attempted_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo
@@ -66,5 +68,19 @@ class RecurringInvoice extends Model
             ->whereIn('status', [RecurringStatus::Active->value, RecurringStatus::Pending->value])
             ->where('recurrence_type', '!=', RecurrenceType::Manual->value)
             ->where('next_invoice_date', '<=', ($asOf ?? Carbon::today())->toDateString());
+    }
+
+    public function isOverdue(): bool
+    {
+        if ($this->recurrence_type === RecurrenceType::Manual) {
+            return false;
+        }
+        if (!in_array($this->status, [RecurringStatus::Active, RecurringStatus::Pending], true)) {
+            return false;
+        }
+        if (!$this->next_invoice_date) {
+            return false;
+        }
+        return $this->next_invoice_date->lt(Carbon::today());
     }
 }
