@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\InvoiceType;
+use App\Exceptions\InvoiceNotDeletableException;
 use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Enums\InvoiceType;
 use App\Models\InvoiceSequence;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -67,11 +67,9 @@ class InvoiceService
     public function create(array $data): Invoice
     {
         return DB::transaction(function () use ($data) {
-            // Get customer currency
             $customer = Customer::findOrFail($data['customer_id']);
-            $currency = $customer->currency ?? 'IDR';
+            $currency = $customer->currency ?? config('billing.default_currency');
 
-            // Generate invoice number
             $year = now()->year;
             $invoiceNumber = InvoiceSequence::getNextNumber($year);
 
@@ -131,11 +129,13 @@ class InvoiceService
     public function delete(Invoice $invoice): void
     {
         if (!$invoice->isDeletable()) {
-            throw new \Exception('Only draft invoices can be deleted. Use cancel for sent invoices.');
+            throw new InvoiceNotDeletableException();
         }
 
-        $invoice->items()->delete();
-        $invoice->forceDelete();
+        DB::transaction(function () use ($invoice) {
+            $invoice->items()->delete();
+            $invoice->forceDelete();
+        });
     }
 
     /**
@@ -224,22 +224,24 @@ class InvoiceService
         return $invoice->fresh();
     }
 
-    /**
-     * Sync invoice items.
-     */
     private function syncItems(Invoice $invoice, array $items): void
     {
-        // Delete existing items
         $invoice->items()->delete();
 
-        // Create new items
+        if (empty($items)) {
+            return;
+        }
+
+        $rows = [];
         foreach ($items as $index => $itemData) {
-            $invoice->items()->create([
+            $rows[] = [
                 'description' => $itemData['description'],
                 'quantity' => $itemData['quantity'],
                 'unit_price' => $itemData['unit_price'],
                 'sort_order' => $index,
-            ]);
+            ];
         }
+
+        $invoice->items()->createMany($rows);
     }
 }

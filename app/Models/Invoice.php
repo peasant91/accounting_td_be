@@ -121,20 +121,22 @@ class Invoice extends Model
         };
     }
 
-    /**
-     * Scope to filter by status.
-     */
     public function scopeByStatus($query, string $status)
     {
         return $query->where('status', $status);
     }
 
-    /**
-     * Scope to filter by customer.
-     */
     public function scopeByCustomer($query, int $customerId)
     {
         return $query->where('customer_id', $customerId);
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->whereIn('status', [
+            InvoiceStatus::Sent->value,
+            InvoiceStatus::Overdue->value,
+        ]);
     }
 
     /**

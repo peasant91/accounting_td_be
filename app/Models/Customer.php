@@ -35,35 +35,25 @@ class Customer extends Model
         'status' => CustomerStatus::class,
     ];
 
-    /**
-     * Get the invoices for the customer.
-     */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
-    /**
-     * Get the total receivable amount (sum of unpaid invoices).
-     */
     public function getTotalReceivableAttribute(): float
     {
-        return (float) $this->invoices()
-            ->whereIn('status', ['sent', 'overdue'])
-            ->sum('total');
+        if (array_key_exists('total_receivable', $this->attributes)) {
+            return (float) $this->attributes['total_receivable'];
+        }
+
+        return (float) $this->invoices()->unpaid()->sum('total');
     }
 
-    /**
-     * Scope to filter by status.
-     */
     public function scopeByStatus($query, string $status)
     {
         return $query->where('status', $status);
     }
 
-    /**
-     * Scope to search by name, email, or phone.
-     */
     public function scopeSearch($query, ?string $search)
     {
         if (!$search) {

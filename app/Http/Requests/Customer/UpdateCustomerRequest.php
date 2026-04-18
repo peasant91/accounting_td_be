@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
+use App\Enums\CustomerStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,7 +37,7 @@ class UpdateCustomerRequest extends FormRequest
             'country' => ['nullable', 'string', 'max:100'],
             'tax_id' => ['nullable', 'string', 'max:50'],
             'notes' => ['nullable', 'string', 'max:500'],
-            'status' => ['nullable', 'in:active,inactive'],
+            'status' => ['nullable', Rule::enum(CustomerStatus::class)],
         ];
     }
 

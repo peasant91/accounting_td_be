@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceSequence extends Model
 {
@@ -11,13 +12,9 @@ class InvoiceSequence extends Model
         'last_number',
     ];
 
-    /**
-     * Get the next invoice number for the given year.
-     * Uses a lock to prevent race conditions.
-     */
     public static function getNextNumber(int $year): string
     {
-        return \DB::transaction(function () use ($year) {
+        return DB::transaction(function () use ($year) {
             $sequence = static::lockForUpdate()->firstOrCreate(
                 ['year' => $year],
                 ['last_number' => 0]
@@ -25,7 +22,12 @@ class InvoiceSequence extends Model
 
             $sequence->increment('last_number');
 
-            return sprintf('INV-%d-%04d', $year, $sequence->last_number);
+            return sprintf(
+                config('billing.invoice_number.format'),
+                config('billing.invoice_number.prefix'),
+                $year,
+                $sequence->last_number
+            );
         });
     }
 }

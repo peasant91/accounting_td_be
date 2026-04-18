@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\InvoiceStatus;
+use App\Enums\CustomerStatus;
 use App\Models\ActivityLog;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -10,9 +10,6 @@ use Illuminate\Support\Collection;
 
 class DashboardService
 {
-    /**
-     * Get complete dashboard summary.
-     */
     public function getSummary(): array
     {
         return [
@@ -24,57 +21,35 @@ class DashboardService
         ];
     }
 
-    /**
-     * Get total receivables (sum of unpaid invoices).
-     */
     public function getTotalReceivables(): float
     {
-        return (float) Invoice::whereIn('status', [
-            InvoiceStatus::Sent,
-            InvoiceStatus::Overdue,
-        ])->sum('total');
+        return (float) Invoice::unpaid()->sum('total');
     }
 
-    /**
-     * Get total active customers count.
-     */
     public function getTotalCustomers(): int
     {
-        return Customer::where('status', 'active')->count();
+        return Customer::where('status', CustomerStatus::Active->value)->count();
     }
 
-    /**
-     * Get invoices due this month.
-     */
     public function getInvoicesDueThisMonth(): array
     {
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
-
-        $invoices = Invoice::whereIn('status', [
-            InvoiceStatus::Sent,
-            InvoiceStatus::Overdue,
-        ])
-            ->whereBetween('due_date', [$startOfMonth, $endOfMonth])
-            ->get();
+        $row = Invoice::unpaid()
+            ->whereBetween('due_date', [now()->startOfMonth(), now()->endOfMonth()])
+            ->selectRaw('COUNT(*) as count, COALESCE(SUM(total), 0) as amount')
+            ->first();
 
         return [
-            'count' => $invoices->count(),
-            'amount' => (float) $invoices->sum('total'),
+            'count' => (int) ($row->count ?? 0),
+            'amount' => (float) ($row->amount ?? 0),
         ];
     }
 
-    /**
-     * Get recurring invoices summary.
-     */
     public function getRecurringInvoicesSummary(): array
     {
-        // Generated today
         $generatedToday = Invoice::where('type', \App\Enums\InvoiceType::Recurring)
             ->whereDate('created_at', now()->today())
             ->count();
 
-        // Upcoming in next 7 days
         $upcoming = \App\Models\RecurringInvoice::where('status', 'active')
             ->where('recurrence_type', '!=', \App\Enums\RecurrenceType::Manual)
             ->whereDate('next_invoice_date', '>=', now()->today())
@@ -82,15 +57,13 @@ class DashboardService
             ->with('customer')
             ->orderBy('next_invoice_date', 'asc')
             ->get()
-            ->map(function ($inv) {
-                return [
-                    'id' => $inv->id,
-                    'customer_id' => $inv->customer_id,
-                    'customer_name' => $inv->customer->name,
-                    'title' => $inv->title,
-                    'next_invoice_date' => $inv->next_invoice_date?->toDateString(),
-                ];
-            });
+            ->map(fn ($inv) => [
+                'id' => $inv->id,
+                'customer_id' => $inv->customer_id,
+                'customer_name' => $inv->customer->name,
+                'title' => $inv->title,
+                'next_invoice_date' => $inv->next_invoice_date?->toDateString(),
+            ]);
 
         return [
             'generated_today' => $generatedToday,
@@ -98,37 +71,29 @@ class DashboardService
         ];
     }
 
-    /**
-     * Get recent activity.
-     */
     public function getRecentActivity(int $limit = 5): Collection
     {
         return ActivityLog::with('loggable')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get()
-            ->map(function ($log) {
-                return [
-                    'id' => $log->id,
-                    'action' => $log->action,
-                    'description' => $this->formatActivityDescription($log),
-                    'created_at' => $log->created_at?->toISOString(),
-                ];
-            });
+            ->map(fn ($log) => [
+                'id' => $log->id,
+                'action' => $log->action,
+                'description' => $this->formatActivityDescription($log),
+                'created_at' => $log->created_at?->toISOString(),
+            ]);
     }
 
-    /**
-     * Format activity description based on action type.
-     */
     private function formatActivityDescription(ActivityLog $log): string
     {
         $loggable = $log->loggable;
         $recipient = $log->properties['recipient'] ?? 'customer';
 
         return match ($log->action) {
-            'created' => $this->getCreatedDescription($log, $loggable),
-            'updated' => $this->getUpdatedDescription($log, $loggable),
-            'deleted' => $this->getDeletedDescription($log, $loggable),
+            'created' => $this->getCreatedDescription($loggable),
+            'updated' => $this->getUpdatedDescription($loggable),
+            'deleted' => $this->getDeletedDescription($log),
             'invoice_sent' => "Invoice {$loggable?->invoice_number} sent to {$recipient}",
             'reminder_sent' => "Payment reminder sent for invoice {$loggable?->invoice_number}",
             'marked_as_paid' => "Invoice {$loggable?->invoice_number} marked as paid",
@@ -137,7 +102,7 @@ class DashboardService
         };
     }
 
-    private function getCreatedDescription(ActivityLog $log, $loggable): string
+    private function getCreatedDescription($loggable): string
     {
         if ($loggable instanceof Customer) {
             return "Customer {$loggable->name} created";
@@ -148,7 +113,7 @@ class DashboardService
         return 'New record created';
     }
 
-    private function getUpdatedDescription(ActivityLog $log, $loggable): string
+    private function getUpdatedDescription($loggable): string
     {
         if ($loggable instanceof Customer) {
             return "Customer {$loggable->name} updated";
@@ -159,9 +124,8 @@ class DashboardService
         return 'Record updated';
     }
 
-    private function getDeletedDescription(ActivityLog $log, $loggable): string
+    private function getDeletedDescription(ActivityLog $log): string
     {
-        $type = class_basename($log->loggable_type);
-        return "{$type} deleted";
+        return class_basename($log->loggable_type) . ' deleted';
     }
 }

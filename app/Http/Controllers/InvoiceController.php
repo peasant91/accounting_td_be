@@ -75,17 +75,11 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice): JsonResponse
     {
-        try {
-            $this->invoiceService->delete($invoice);
+        $this->invoiceService->delete($invoice);
 
-            return response()->json([
-                'message' => 'Invoice deleted successfully',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 403);
-        }
+        return response()->json([
+            'message' => 'Invoice deleted successfully',
+        ]);
     }
 
     /**
