@@ -27,6 +27,8 @@ class RecurringInvoiceResource extends JsonResource
             'due_date_offset' => $this->due_date_offset,
             'notes' => $this->notes,
             'last_generated_at' => $this->last_generated_at?->toISOString(),
+            'last_attempted_at' => $this->last_attempted_at?->toIso8601String(),
+            'is_overdue' => $this->isOverdue(),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
