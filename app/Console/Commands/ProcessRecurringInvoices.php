@@ -28,13 +28,9 @@ class ProcessRecurringInvoices extends Command
     {
         $this->info('Starting recurring invoice processing...');
 
-        try {
-            $count = $service->processScheduledInvoices();
-            $this->info("Successfully processed {$count} recurring invoices.");
-            return Command::SUCCESS;
-        } catch (\Exception $e) {
-            $this->error('Values failed to process: ' . $e->getMessage());
-            return Command::FAILURE;
-        }
+        $count = $service->processScheduledInvoices();
+        $this->info("Successfully processed {$count} recurring invoices.");
+
+        return Command::SUCCESS;
     }
 }

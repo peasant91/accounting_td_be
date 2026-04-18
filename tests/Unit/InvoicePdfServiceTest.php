@@ -44,7 +44,7 @@ class InvoicePdfServiceTest extends TestCase
     public function test_generate_returns_pdf_instance(): void
     {
         $invoice = $this->createInvoice();
-        $service = new InvoicePdfService();
+        $service = app(InvoicePdfService::class);
 
         $pdf = $service->generate($invoice);
 
@@ -54,7 +54,7 @@ class InvoicePdfServiceTest extends TestCase
     public function test_generate_raw_returns_string(): void
     {
         $invoice = $this->createInvoice();
-        $service = new InvoicePdfService();
+        $service = app(InvoicePdfService::class);
 
         $raw = $service->generateRaw($invoice);
 
@@ -100,7 +100,7 @@ class InvoicePdfServiceTest extends TestCase
             'components' => $customComponents,
         ]);
 
-        $service = new InvoicePdfService();
+        $service = app(InvoicePdfService::class);
         $pdf = $service->generate($invoice);
 
         // If we got here without error, the template was used
@@ -116,7 +116,7 @@ class InvoicePdfServiceTest extends TestCase
             InvoiceTemplate::where('customer_id', $invoice->customer_id)->first()
         );
 
-        $service = new InvoicePdfService();
+        $service = app(InvoicePdfService::class);
         $pdf = $service->generate($invoice);
 
         $this->assertInstanceOf(\Barryvdh\DomPDF\PDF::class, $pdf);

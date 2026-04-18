@@ -18,7 +18,8 @@ use Illuminate\Http\Request;
 class InvoiceController extends Controller
 {
     public function __construct(
-        private InvoiceService $invoiceService
+        private InvoiceService $invoiceService,
+        private InvoicePdfService $pdfService,
     ) {
     }
 
@@ -149,10 +150,8 @@ class InvoiceController extends Controller
      */
     public function downloadPdf(Invoice $invoice)
     {
-        $pdfService = app(InvoicePdfService::class);
-        $pdf = $pdfService->generate($invoice);
         $filename = "Invoice-{$invoice->invoice_number}.pdf";
 
-        return $pdf->download($filename);
+        return $this->pdfService->generate($invoice)->download($filename);
     }
 }

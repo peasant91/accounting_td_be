@@ -15,12 +15,15 @@ class InvoiceEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    private ?string $pdfContent = null;
+
     public function __construct(
         public Invoice $invoice,
         string $subject,
         public ?string $messageBody = null,
     ) {
         $this->subject = $subject;
+        $this->invoice->loadMissing(['items', 'customer']);
     }
 
     public function envelope(): Envelope
@@ -33,7 +36,7 @@ class InvoiceEmail extends Mailable
         return new Content(
             markdown: 'emails.invoice',
             with: [
-                'invoice' => $this->invoice->load(['items', 'customer']),
+                'invoice' => $this->invoice,
                 'messageBody' => $this->messageBody,
             ],
         );
@@ -41,12 +44,11 @@ class InvoiceEmail extends Mailable
 
     public function attachments(): array
     {
-        $pdfService = app(InvoicePdfService::class);
-        $pdfContent = $pdfService->generateRaw($this->invoice);
+        $this->pdfContent ??= app(InvoicePdfService::class)->generateRaw($this->invoice);
         $filename = "Invoice-{$this->invoice->invoice_number}.pdf";
 
         return [
-            Attachment::fromData(fn() => $pdfContent, $filename)
+            Attachment::fromData(fn () => $this->pdfContent, $filename)
                 ->withMime('application/pdf'),
         ];
     }

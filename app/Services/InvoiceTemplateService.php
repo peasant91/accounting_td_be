@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\InvoiceTemplate;
-use Illuminate\Support\Arr;
 
 class InvoiceTemplateService
 {
@@ -52,13 +51,8 @@ class InvoiceTemplateService
 
         foreach ($defaultComponents as $default) {
             $key = $default['key'];
-            // If saved, use saved 'enabled'. If not saved, use default 'enabled'.
             $enabled = $savedMap[$key] ?? $default['enabled'];
 
-            // Should always respect 'required' -> cannot enable if required is true? No, required means enabled=true always?
-            // "required": true means it cannot be disabled.
-            // But if the user somehow saved it as disabled, we should probably force it to enabled?
-            // The validation handles saving, but reading back we should also enforce it just in case.
             if ($default['required']) {
                 $enabled = true;
             }

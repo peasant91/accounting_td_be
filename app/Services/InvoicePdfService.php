@@ -3,59 +3,38 @@
 namespace App\Services;
 
 use App\Models\Invoice;
-use App\Models\InvoiceTemplate;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoicePdfService
 {
+    public function __construct(
+        protected InvoiceTemplateService $templateService
+    ) {
+    }
+
     /**
-     * Generate a PDF for the given invoice.
-     *
      * @return \Barryvdh\DomPDF\PDF
      */
     public function generate(Invoice $invoice)
     {
-        $invoice->load(['items', 'customer']);
+        $invoice->loadMissing(['items', 'customer.invoiceTemplate']);
 
-        // Resolve the customer's invoice template (or use defaults)
-        $template = InvoiceTemplate::where('customer_id', $invoice->customer_id)->first();
-        $components = $template
-            ? $template->components
-            : config('invoice.default_components');
+        $templateData = $this->templateService->getTemplateForCustomer($invoice->customer);
+        $locale = $templateData['resolved_locale'];
 
-        // Resolve locale labels based on currency
-        $currency = $invoice->currency ?? 'IDR';
-        $localeMap = config('invoice.currency_locale_map');
-        $language = $localeMap[$currency]['language'] ?? 'en';
-        $labels = config("invoice.labels.{$language}", config('invoice.labels.en'));
-
-        $data = [
+        return Pdf::loadView('pdf.invoice', [
             'invoice' => $invoice,
-            'components' => $components,
-            'labels' => $labels,
-            'language' => $language,
-        ];
-
-        return Pdf::loadView('pdf.invoice', $data)
-            ->setPaper('a4', 'portrait');
+            'components' => $templateData['components'],
+            'labels' => $locale['labels'],
+            'language' => $locale['language'],
+        ])->setPaper('a4', 'portrait');
     }
 
-    /**
-     * Generate PDF and return raw content as string.
-     */
     public function generateRaw(Invoice $invoice): string
     {
         return $this->generate($invoice)->output();
     }
 
-    /**
-     * Format a currency amount for display in PDF.
-     *
-     * Matches the frontend InvoicePrintView.tsx formatting logic:
-     * - JPY: ¥ + period separators, no decimals
-     * - IDR: "IDR " + period separators, no decimals
-     * - USD/AUD/default: $ + comma separators, 2 decimals
-     */
     public static function formatCurrency(float $amount, string $currency): string
     {
         return match ($currency) {

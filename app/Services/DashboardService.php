@@ -46,16 +46,17 @@ class DashboardService
 
     public function getRecurringInvoicesSummary(): array
     {
-        $generatedToday = Invoice::where('type', \App\Enums\InvoiceType::Recurring)
+        $generatedToday = Invoice::where('type', \App\Enums\InvoiceType::Recurring->value)
             ->whereDate('created_at', now()->today())
             ->count();
 
-        $upcoming = \App\Models\RecurringInvoice::where('status', 'active')
-            ->where('recurrence_type', '!=', \App\Enums\RecurrenceType::Manual)
-            ->whereDate('next_invoice_date', '>=', now()->today())
-            ->whereDate('next_invoice_date', '<=', now()->today()->addDays(7))
+        $today = now()->today();
+        $upcoming = \App\Models\RecurringInvoice::where('status', \App\Enums\RecurringStatus::Active->value)
+            ->where('recurrence_type', '!=', \App\Enums\RecurrenceType::Manual->value)
+            ->where('next_invoice_date', '>=', $today->toDateString())
+            ->where('next_invoice_date', '<=', $today->copy()->addDays(7)->toDateString())
             ->with('customer')
-            ->orderBy('next_invoice_date', 'asc')
+            ->orderBy('next_invoice_date')
             ->get()
             ->map(fn ($inv) => [
                 'id' => $inv->id,
