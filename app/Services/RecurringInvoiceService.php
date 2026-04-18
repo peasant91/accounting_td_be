@@ -165,6 +165,8 @@ class RecurringInvoiceService
         RecurringInvoice::dueForGeneration($asOf)
             ->chunkById(100, function ($chunk) use (&$count) {
                 foreach ($chunk as $recurringInvoice) {
+                    $recurringInvoice->forceFill(['last_attempted_at' => now()])->save();
+
                     try {
                         if ($this->generateInvoice($recurringInvoice)) {
                             $count++;
