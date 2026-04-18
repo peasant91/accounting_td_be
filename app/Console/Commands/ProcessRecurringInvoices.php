@@ -26,6 +26,8 @@ class ProcessRecurringInvoices extends Command
      */
     public function handle(RecurringInvoiceService $service): int
     {
+        cache()->forever('recurring_cron.last_run_at', now());
+
         $this->info('Starting recurring invoice processing...');
 
         $count = $service->processScheduledInvoices();
