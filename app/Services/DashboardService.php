@@ -50,6 +50,14 @@ class DashboardService
             ->whereDate('created_at', now()->today())
             ->count();
 
+        $overdueCount = \App\Models\RecurringInvoice::dueForGeneration()->count();
+
+        $lastRun = cache('recurring_cron.last_run_at');
+        $cron = [
+            'last_run_at' => $lastRun?->toIso8601String(),
+            'is_silent' => $lastRun === null || $lastRun->lt(now()->startOfDay()),
+        ];
+
         $today = now()->today();
         $upcoming = \App\Models\RecurringInvoice::where('status', \App\Enums\RecurringStatus::Active->value)
             ->where('recurrence_type', '!=', \App\Enums\RecurrenceType::Manual->value)
@@ -68,6 +76,8 @@ class DashboardService
 
         return [
             'generated_today' => $generatedToday,
+            'overdue_count' => $overdueCount,
+            'cron' => $cron,
             'upcoming' => $upcoming,
         ];
     }
