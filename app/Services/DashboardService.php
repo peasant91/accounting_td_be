@@ -3,13 +3,20 @@
 namespace App\Services;
 
 use App\Enums\CustomerStatus;
+use App\Exceptions\MissingRateException;
 use App\Models\ActivityLog;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Services\CurrencyConverter;
 use Illuminate\Support\Collection;
 
 class DashboardService
 {
+    public function __construct(
+        protected CurrencyConverter $converter
+    ) {
+    }
+
     public function getSummary(): array
     {
         return [
@@ -21,9 +28,41 @@ class DashboardService
         ];
     }
 
-    public function getTotalReceivables(): float
+    public function getTotalReceivables(): array
     {
-        return (float) Invoice::unpaid()->sum('total');
+        $byCurrency = Invoice::unpaid()
+            ->selectRaw('currency, SUM(total) as amount')
+            ->groupBy('currency')
+            ->get();
+
+        $base = config('billing.base_currency', 'IDR');
+        $breakdown = [];
+        $missing = [];
+        $baseTotal = 0.0;
+
+        foreach ($byCurrency as $row) {
+            $amount = (float) $row->amount;
+            $entry = [
+                'currency' => $row->currency,
+                'amount' => $amount,
+                'base_equivalent' => null,
+            ];
+            try {
+                $entry['base_equivalent'] = $this->converter->convert($amount, $row->currency, $base);
+                $baseTotal += $entry['base_equivalent'];
+            } catch (MissingRateException) {
+                $missing[] = $row->currency;
+            }
+            $breakdown[] = $entry;
+        }
+
+        return [
+            'base_currency' => $base,
+            'base_total' => $baseTotal,
+            'breakdown' => $breakdown,
+            'rates_updated_at' => $this->converter->ratesUpdatedAt()?->toIso8601String(),
+            'missing_rates' => $missing,
+        ];
     }
 
     public function getTotalCustomers(): int

@@ -21,6 +21,6 @@ class DashboardController extends Controller
 
         return response()->json([
             'data' => $summary,
-        ]);
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 }
