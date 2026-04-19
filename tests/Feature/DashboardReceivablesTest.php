@@ -7,12 +7,22 @@ use App\Enums\InvoiceType;
 use App\Models\CurrencyRate;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DashboardReceivablesTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
+    }
 
     private function invoice(string $currency, float $total, InvoiceStatus $status): Invoice
     {

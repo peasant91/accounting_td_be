@@ -7,6 +7,7 @@ use App\Enums\InvoiceType;
 use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Queue;
@@ -15,6 +16,15 @@ use Tests\TestCase;
 class InvoiceControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
+    }
 
     private function createInvoice(array $overrides = []): Invoice
     {

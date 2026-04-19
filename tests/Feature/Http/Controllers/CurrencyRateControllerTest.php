@@ -3,12 +3,22 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\CurrencyRate;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CurrencyRateControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
+    }
 
     public function test_index_returns_all_rates_and_base_currency(): void
     {

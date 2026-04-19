@@ -13,17 +13,13 @@ class InvoiceTemplateTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $admin;
+
     protected function setUp(): void
     {
         parent::setUp();
-        // Create a user if auth is required, but currently it's open or basic auth depending on middleware
-        // Design says: "No additional auth needed for single-tenant admin-only usage."
-        // But likely we need to be authenticated as a user if `auth:sanctum` is used.
-        // I'll assume public for now as per `routes/api.php` usually default middleware apply.
-        // Wait, typical Laravel install has auth middleware.
-        // Routes are in `routes/api.php` under `v1`. Usually no auth by default unless specified.
-        // I'll check `routes/api.php` again.
-        // It's `Route::prefix('v1')->group(...)`, no middleware group.
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
     }
 
     public function test_get_invoice_template_returns_default_when_none_exists()

@@ -6,6 +6,7 @@ use App\Enums\RecurrenceType;
 use App\Enums\RecurringStatus;
 use App\Models\Customer;
 use App\Models\RecurringInvoice;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -13,6 +14,15 @@ use Tests\TestCase;
 class DashboardRecurringHealthTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
+    }
 
     private function schedule(array $overrides = []): RecurringInvoice
     {
