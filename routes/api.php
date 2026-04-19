@@ -20,6 +20,11 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('admins', \App\Http\Controllers\AdminController::class)
                 ->parameters(['admins' => 'admin']);
         });
+
+        Route::prefix('audit')->group(function () {
+            Route::get('/activity', [\App\Http\Controllers\AuditController::class, 'activity']);
+            Route::get('/login-attempts', [\App\Http\Controllers\AuditController::class, 'loginAttempts']);
+        });
     });
 
     // Dashboard
