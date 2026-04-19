@@ -15,6 +15,11 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
         Route::get('/me', [\App\Http\Controllers\AuthController::class, 'me']);
+
+        Route::middleware(['role:super_admin'])->group(function () {
+            Route::apiResource('admins', \App\Http\Controllers\AdminController::class)
+                ->parameters(['admins' => 'admin']);
+        });
     });
 
     // Dashboard
