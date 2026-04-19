@@ -33,4 +33,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/customers/{customer}/recurring-invoices', [\App\Http\Controllers\RecurringInvoiceController::class, 'index']);
     Route::post('/recurring-invoices/{recurringInvoice}/generate', [\App\Http\Controllers\RecurringInvoiceController::class, 'manualGenerate']);
     Route::apiResource('recurring-invoices', \App\Http\Controllers\RecurringInvoiceController::class)->except(['index', 'create', 'edit']);
+
+    // Currency Rates
+    Route::get('/currency-rates', [\App\Http\Controllers\CurrencyRateController::class, 'index']);
+    Route::put('/currency-rates/{currency}', [\App\Http\Controllers\CurrencyRateController::class, 'upsert']);
 });
