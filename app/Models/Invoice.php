@@ -6,7 +6,6 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\InvoiceType;
 use App\Services\Audit\AuditsChanges;
-use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
-    use SoftDeletes, HasActivityLog, AuditsChanges;
+    use SoftDeletes, AuditsChanges;
 
     protected $fillable = [
         'customer_id',

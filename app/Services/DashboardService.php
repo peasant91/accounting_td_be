@@ -141,14 +141,14 @@ class DashboardService
         $recipient = $log->properties['recipient'] ?? 'customer';
 
         return match ($log->action) {
-            'created' => $this->getCreatedDescription($loggable),
-            'updated' => $this->getUpdatedDescription($loggable),
-            'deleted' => $this->getDeletedDescription($log),
-            'invoice_sent' => "Invoice {$loggable?->invoice_number} sent to {$recipient}",
-            'reminder_sent' => "Payment reminder sent for invoice {$loggable?->invoice_number}",
-            'marked_as_paid' => "Invoice {$loggable?->invoice_number} marked as paid",
-            'cancelled' => "Invoice {$loggable?->invoice_number} cancelled",
-            default => ucfirst($log->action) . ' action performed',
+            'customer.created', 'invoice.created', 'recurringinvoice.created' => $this->getCreatedDescription($loggable),
+            'customer.updated', 'invoice.updated', 'recurringinvoice.updated' => $this->getUpdatedDescription($loggable),
+            'customer.deleted', 'invoice.deleted', 'recurringinvoice.deleted' => $this->getDeletedDescription($log),
+            'invoice.sent' => "Invoice {$loggable?->invoice_number} sent to {$recipient}",
+            'invoice.reminder_sent' => "Payment reminder sent for invoice {$loggable?->invoice_number}",
+            'invoice.marked_as_paid' => "Invoice {$loggable?->invoice_number} marked as paid",
+            'invoice.cancelled' => "Invoice {$loggable?->invoice_number} cancelled",
+            default => ucfirst(str_replace('.', ' ', $log->action)) . ' action performed',
         };
     }
 

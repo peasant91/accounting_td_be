@@ -9,6 +9,7 @@ use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceSequence;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -149,10 +150,14 @@ class InvoiceService
         }
 
         // Log the send activity
-        $invoice->logActivity('invoice_sent', [
-            'recipient' => $data['recipient_email'],
-            'subject' => $data['subject'],
-        ]);
+        app(AuditLogger::class)->log(
+            action: 'invoice.sent',
+            target: $invoice,
+            properties: [
+                'recipient' => $data['recipient_email'],
+                'subject' => $data['subject'],
+            ],
+        );
 
         SendInvoiceEmailJob::dispatch(
             invoice: $invoice,
@@ -167,10 +172,14 @@ class InvoiceService
      */
     public function sendReminder(Invoice $invoice, array $data): void
     {
-        $invoice->logActivity('reminder_sent', [
-            'recipient' => $data['recipient_email'],
-            'subject' => $data['subject'],
-        ]);
+        app(AuditLogger::class)->log(
+            action: 'invoice.reminder_sent',
+            target: $invoice,
+            properties: [
+                'recipient' => $data['recipient_email'],
+                'subject' => $data['subject'],
+            ],
+        );
 
         SendInvoiceEmailJob::dispatch(
             invoice: $invoice,
@@ -199,10 +208,14 @@ class InvoiceService
             'payment_proof_path' => $paymentProofPath,
         ]);
 
-        $invoice->logActivity('marked_as_paid', [
-            'payment_date' => $data['payment_date'],
-            'payment_method' => $data['payment_method'] ?? null,
-        ]);
+        app(AuditLogger::class)->log(
+            action: 'invoice.marked_as_paid',
+            target: $invoice,
+            properties: [
+                'payment_date' => $data['payment_date'],
+                'payment_method' => $data['payment_method'] ?? null,
+            ],
+        );
 
         return $invoice->fresh();
     }
@@ -217,9 +230,13 @@ class InvoiceService
             'cancellation_reason' => $data['cancellation_reason'],
         ]);
 
-        $invoice->logActivity('cancelled', [
-            'reason' => $data['cancellation_reason'],
-        ]);
+        app(AuditLogger::class)->log(
+            action: 'invoice.cancelled',
+            target: $invoice,
+            properties: [
+                'reason' => $data['cancellation_reason'],
+            ],
+        );
 
         return $invoice->fresh();
     }
