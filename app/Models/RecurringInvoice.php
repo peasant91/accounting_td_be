@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\RecurrenceType;
 use App\Enums\RecurrenceUnit;
 use App\Enums\RecurringStatus;
+use App\Services\Audit\AuditsChanges;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RecurringInvoice extends Model
 {
-    use HasFactory;
+    use HasFactory, AuditsChanges;
 
     protected $fillable = [
         'customer_id',

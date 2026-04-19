@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CustomerStatus;
+use App\Services\Audit\AuditsChanges;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use HasFactory, SoftDeletes, HasActivityLog;
+    use HasFactory, SoftDeletes, HasActivityLog, AuditsChanges;
 
     protected $fillable = [
         'name',
