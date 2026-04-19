@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Route;
 
 // API v1 routes
 Route::prefix('v1')->group(function () {
+    // Auth (public)
+    Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
+
+    // Auth (requires session)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+        Route::get('/me', [\App\Http\Controllers\AuthController::class, 'me']);
+    });
+
     // Dashboard
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
