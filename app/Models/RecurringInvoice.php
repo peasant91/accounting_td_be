@@ -68,7 +68,7 @@ class RecurringInvoice extends Model
         return $query
             ->whereIn('status', [RecurringStatus::Active->value, RecurringStatus::Pending->value])
             ->where('recurrence_type', '!=', RecurrenceType::Manual->value)
-            ->where('next_invoice_date', '<=', ($asOf ?? Carbon::today())->toDateString());
+            ->whereDate('next_invoice_date', '<=', $asOf ?? Carbon::today());
     }
 
     public function isOverdue(): bool

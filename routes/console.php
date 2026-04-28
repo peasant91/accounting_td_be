@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('invoices:process-recurring')->daily();
+Schedule::command('invoices:process-recurring')->dailyAt('00:00')->timezone('Asia/Makassar');
