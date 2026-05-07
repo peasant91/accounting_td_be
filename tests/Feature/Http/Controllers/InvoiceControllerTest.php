@@ -244,4 +244,26 @@ class InvoiceControllerTest extends TestCase
         $updateResponse->assertStatus(200);
         $this->assertNull($updateResponse->json('data.items.0.notes'));
     }
+
+    public function test_store_rejects_item_notes_longer_than_2000_chars(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $response = $this->postJson('/api/v1/invoices', [
+            'customer_id' => $customer->id,
+            'invoice_date' => now()->format('Y-m-d'),
+            'tax_rate' => 0,
+            'items' => [
+                [
+                    'description' => 'X',
+                    'notes' => str_repeat('a', 2001),
+                    'quantity' => 1,
+                    'unit_price' => 10,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['items.0.notes']);
+    }
 }
