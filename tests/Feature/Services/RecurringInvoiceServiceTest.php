@@ -65,4 +65,22 @@ class RecurringInvoiceServiceTest extends TestCase
 
         $this->assertNotNull($schedule->fresh()->last_attempted_at);
     }
+
+    public function test_processScheduledInvoices_propagates_item_notes_to_generated_invoice(): void
+    {
+        $schedule = $this->activeSchedule([
+            'line_items' => [
+                ['description' => 'Svc', 'notes' => 'Recurring note', 'quantity' => 1, 'unit_price' => 100, 'amount' => 100],
+                ['description' => 'Other', 'quantity' => 2, 'unit_price' => 50, 'amount' => 100],
+            ],
+        ]);
+
+        app(RecurringInvoiceService::class)->processScheduledInvoices();
+
+        $invoice = $schedule->fresh()->invoices()->with('items')->latest()->first();
+        $this->assertNotNull($invoice);
+        $items = $invoice->items->sortBy('sort_order')->values();
+        $this->assertSame('Recurring note', $items[0]->notes);
+        $this->assertNull($items[1]->notes);
+    }
 }
