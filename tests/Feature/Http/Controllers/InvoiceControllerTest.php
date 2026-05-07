@@ -213,4 +213,32 @@ class InvoiceControllerTest extends TestCase
         $this->assertSame('Includes 100GB storage and SSL cert', $items[0]['notes']);
         $this->assertNull($items[1]['notes']);
     }
+
+    public function test_update_clears_item_notes_when_empty_string_sent(): void
+    {
+        $customer = Customer::factory()->create();
+
+        // Create draft invoice with a note
+        $createResponse = $this->postJson('/api/v1/invoices', [
+            'customer_id' => $customer->id,
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'tax_rate' => 0,
+            'items' => [
+                ['description' => 'A', 'notes' => 'original note', 'quantity' => 1, 'unit_price' => 10],
+            ],
+        ]);
+
+        $invoiceId = $createResponse->json('data.id');
+
+        // Update sending an empty notes string
+        $updateResponse = $this->putJson("/api/v1/invoices/{$invoiceId}", [
+            'items' => [
+                ['description' => 'A', 'notes' => '   ', 'quantity' => 1, 'unit_price' => 10],
+            ],
+        ]);
+
+        $updateResponse->assertStatus(200);
+        $this->assertNull($updateResponse->json('data.items.0.notes'));
+    }
 }
