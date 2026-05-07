@@ -23,6 +23,7 @@ class UpdateInvoiceRequest extends FormRequest
             'internal_notes' => ['nullable', 'string', 'max:500'],
             'items' => ['sometimes', 'required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string', 'max:200'],
+            'items.*.notes' => ['nullable', 'string', 'max:2000'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
         ];

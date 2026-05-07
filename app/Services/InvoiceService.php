@@ -251,8 +251,14 @@ class InvoiceService
 
         $rows = [];
         foreach ($items as $index => $itemData) {
+            $notes = $itemData['notes'] ?? null;
+            if (is_string($notes) && trim($notes) === '') {
+                $notes = null;
+            }
+
             $rows[] = [
                 'description' => $itemData['description'],
+                'notes' => $notes,
                 'quantity' => $itemData['quantity'],
                 'unit_price' => $itemData['unit_price'],
                 'sort_order' => $index,

@@ -182,4 +182,35 @@ class InvoiceControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('content-type', 'application/pdf');
     }
+
+    public function test_store_persists_and_returns_item_notes(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $response = $this->postJson('/api/v1/invoices', [
+            'customer_id' => $customer->id,
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'tax_rate' => 0,
+            'items' => [
+                [
+                    'description' => 'Web hosting',
+                    'notes' => 'Includes 100GB storage and SSL cert',
+                    'quantity' => 1,
+                    'unit_price' => 50,
+                ],
+                [
+                    'description' => 'Domain renewal',
+                    'quantity' => 1,
+                    'unit_price' => 12,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $items = $response->json('data.items');
+        $this->assertCount(2, $items);
+        $this->assertSame('Includes 100GB storage and SSL cert', $items[0]['notes']);
+        $this->assertNull($items[1]['notes']);
+    }
 }
