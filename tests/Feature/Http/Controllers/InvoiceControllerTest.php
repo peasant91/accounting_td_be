@@ -229,6 +229,9 @@ class InvoiceControllerTest extends TestCase
             ],
         ]);
 
+        $createResponse->assertStatus(201);
+        $this->assertSame('original note', $createResponse->json('data.items.0.notes'));
+
         $invoiceId = $createResponse->json('data.id');
 
         // Update sending an empty notes string
