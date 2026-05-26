@@ -35,6 +35,7 @@ class RecurringInvoice extends Model
         'notes',
         'last_generated_at',
         'last_attempted_at',
+        'use_unique_code',
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class RecurringInvoice extends Model
         'tax_rate' => 'decimal:2',
         'due_date_offset' => 'integer',
         'last_attempted_at' => 'datetime',
+        'use_unique_code' => 'boolean',
     ];
 
     public function customer(): BelongsTo

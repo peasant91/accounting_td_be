@@ -48,7 +48,7 @@ class UniqueCodeTest extends TestCase
     public function test_recurring_invoices_table_has_use_unique_code_column(): void
     {
         $customer = Customer::factory()->create();
-        $ri = \App\Models\RecurringInvoice::forceCreate([
+        $ri = \App\Models\RecurringInvoice::create([
             'customer_id' => $customer->id,
             'title' => 'Test',
             'recurrence_type' => \App\Enums\RecurrenceType::Manual,
