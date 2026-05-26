@@ -145,6 +145,30 @@ class UniqueCodeTest extends TestCase
         $this->assertDatabaseHas('invoices', ['use_unique_code' => 1]);
     }
 
+    public function test_recurring_invoice_passes_use_unique_code_when_generating(): void
+    {
+        $customer = Customer::factory()->create();
+        $ri = \App\Models\RecurringInvoice::create([
+            'customer_id' => $customer->id,
+            'title' => 'Monthly',
+            'recurrence_type' => \App\Enums\RecurrenceType::Manual,
+            'recurrence_interval' => 1,
+            'start_date' => now()->format('Y-m-d'),
+            'status' => \App\Enums\RecurringStatus::Active,
+            'line_items' => [['description' => 'Fee', 'quantity' => 1, 'unit_price' => 500, 'amount' => 500]],
+            'tax_rate' => 0,
+            'currency' => 'IDR',
+            'due_date_offset' => 7,
+            'use_unique_code' => true,
+        ]);
+
+        $service = app(\App\Services\RecurringInvoiceService::class);
+        $invoice = $service->generateInvoice($ri, isManual: true);
+
+        $this->assertNotNull($invoice);
+        $this->assertTrue($invoice->use_unique_code);
+    }
+
     public function test_store_invoice_use_unique_code_defaults_to_false(): void
     {
         $customer = Customer::factory()->create();

@@ -91,6 +91,7 @@ class RecurringInvoiceService
                 'type' => InvoiceType::Recurring,
                 'recurring_invoice_id' => $locked->id,
                 'items' => $locked->line_items,
+                'use_unique_code' => $locked->use_unique_code ?? false,
             ]);
 
             if (!$isManual) {
