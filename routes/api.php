@@ -45,6 +45,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/currency-rates', [\App\Http\Controllers\CurrencyRateController::class, 'index']);
         Route::put('/currency-rates/{currency}', [\App\Http\Controllers\CurrencyRateController::class, 'upsert']);
 
+        // Item Templates
+        Route::get('/item-templates', [\App\Http\Controllers\ItemTemplateController::class, 'index']);
+        Route::post('/item-templates', [\App\Http\Controllers\ItemTemplateController::class, 'store']);
+        Route::put('/item-templates/{itemTemplate}', [\App\Http\Controllers\ItemTemplateController::class, 'update']);
+        Route::delete('/item-templates/{itemTemplate}', [\App\Http\Controllers\ItemTemplateController::class, 'destroy']);
+
         // Admin management (super_admin only)
         Route::middleware(['role:super_admin'])->group(function () {
             Route::apiResource('admins', \App\Http\Controllers\AdminController::class)
