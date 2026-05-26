@@ -26,6 +26,7 @@ class RecurringInvoiceResource extends JsonResource
             'currency' => $this->currency,
             'due_date_offset' => $this->due_date_offset,
             'notes' => $this->notes,
+            'use_unique_code' => (bool) $this->use_unique_code,
             'last_generated_at' => $this->last_generated_at?->toISOString(),
             'last_attempted_at' => $this->last_attempted_at?->toIso8601String(),
             'is_overdue' => $this->isOverdue(),
