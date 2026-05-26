@@ -11,7 +11,7 @@ class ItemTemplateController extends Controller
 {
     public function index(): JsonResponse
     {
-        $templates = ItemTemplate::orderBy('id')->get();
+        $templates = ItemTemplate::orderBy('name')->get();
 
         return response()->json([
             'data' => ItemTemplateResource::collection($templates),

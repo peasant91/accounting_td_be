@@ -22,14 +22,14 @@ class ItemTemplateTest extends TestCase
 
     public function test_can_list_item_templates(): void
     {
-        ItemTemplate::create(['name' => 'Web Design Monthly']);
         ItemTemplate::create(['name' => 'Hosting Fee']);
+        ItemTemplate::create(['name' => 'Web Design Monthly']);
 
         $response = $this->getJson('/api/v1/item-templates');
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data')
-            ->assertJsonPath('data.0.name', 'Web Design Monthly');
+            ->assertJsonPath('data.0.name', 'Hosting Fee');
     }
 
     public function test_can_create_item_template(): void
