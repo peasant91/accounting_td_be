@@ -26,6 +26,7 @@ class StoreInvoiceRequest extends FormRequest
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'send_immediately' => ['nullable', 'boolean'],
+            'use_unique_code' => ['nullable', 'boolean'],
         ];
     }
 

@@ -125,4 +125,41 @@ class UniqueCodeTest extends TestCase
 
         $this->assertEquals(1, $invoice->unique_code);
     }
+
+    public function test_store_invoice_accepts_use_unique_code(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $response = $this->postJson('/api/v1/invoices', [
+            'customer_id' => $customer->id,
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'tax_rate' => 0,
+            'use_unique_code' => true,
+            'items' => [
+                ['description' => 'Service', 'quantity' => 1, 'unit_price' => 1000000],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('invoices', ['use_unique_code' => 1]);
+    }
+
+    public function test_store_invoice_use_unique_code_defaults_to_false(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $response = $this->postJson('/api/v1/invoices', [
+            'customer_id' => $customer->id,
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'tax_rate' => 0,
+            'items' => [
+                ['description' => 'Service', 'quantity' => 1, 'unit_price' => 100],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonPath('data.use_unique_code', false);
+    }
 }

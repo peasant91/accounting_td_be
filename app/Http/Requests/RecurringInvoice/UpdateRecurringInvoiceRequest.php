@@ -34,6 +34,7 @@ class UpdateRecurringInvoiceRequest extends FormRequest
             'due_date_offset' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(RecurringStatus::class)],
+            'use_unique_code' => ['nullable', 'boolean'],
         ];
     }
 }

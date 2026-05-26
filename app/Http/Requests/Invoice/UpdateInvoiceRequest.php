@@ -26,6 +26,7 @@ class UpdateInvoiceRequest extends FormRequest
             'items.*.notes' => ['nullable', 'string', 'max:2000'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'use_unique_code' => ['nullable', 'boolean'],
         ];
     }
 
