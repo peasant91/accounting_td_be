@@ -1,0 +1,67 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\User;
+use App\Enums\InvoiceStatus;
+use App\Enums\InvoiceType;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class UniqueCodeTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
+    }
+
+    public function test_invoices_table_has_use_unique_code_column(): void
+    {
+        $customer = Customer::factory()->create();
+        $invoice = Invoice::forceCreate(array_merge([
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-2026-0042',
+            'currency' => 'IDR',
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'status' => InvoiceStatus::Draft,
+            'tax_rate' => 0,
+            'subtotal' => 1000000,
+            'tax_amount' => 0,
+            'total' => 1000000,
+            'type' => InvoiceType::Manual,
+            'use_unique_code' => true,
+        ]));
+
+        $this->assertTrue($invoice->use_unique_code);
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id, 'use_unique_code' => 1]);
+    }
+
+    public function test_use_unique_code_defaults_to_false(): void
+    {
+        $customer = Customer::factory()->create();
+        $invoice = Invoice::create([
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-2026-0001',
+            'currency' => 'IDR',
+            'invoice_date' => now()->format('Y-m-d'),
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
+            'status' => InvoiceStatus::Draft,
+            'tax_rate' => 0,
+            'subtotal' => 100,
+            'tax_amount' => 0,
+            'total' => 100,
+            'type' => InvoiceType::Manual,
+        ]);
+
+        $this->assertFalse((bool) $invoice->use_unique_code);
+    }
+}
