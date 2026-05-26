@@ -27,6 +27,7 @@ class Invoice extends Model
         'tax_rate',
         'tax_amount',
         'total',
+        'use_unique_code',
         'status',
         'notes',
         'internal_notes',
@@ -49,6 +50,7 @@ class Invoice extends Model
         'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total' => 'decimal:2',
+        'use_unique_code' => 'boolean',
     ];
 
     /**
@@ -105,6 +107,12 @@ class Invoice extends Model
     public function isDeletable(): bool
     {
         return $this->status === InvoiceStatus::Draft;
+    }
+
+    public function getUniqueCodeAttribute(): int
+    {
+        $parts = explode('-', $this->invoice_number);
+        return (int) end($parts);
     }
 
     /**
