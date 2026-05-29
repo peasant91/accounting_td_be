@@ -15,6 +15,7 @@ class StoreItemTemplateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
+            'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

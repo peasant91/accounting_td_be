@@ -92,4 +92,70 @@ class ItemTemplateTest extends TestCase
         $response = $this->withoutCookies()->getJson('/api/v1/item-templates');
         $response->assertStatus(401);
     }
+
+    public function test_can_create_item_template_with_description(): void
+    {
+        $response = $this->postJson('/api/v1/item-templates', [
+            'name' => 'Consulting',
+            'description' => 'Monthly retainer for consulting services',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.name', 'Consulting')
+            ->assertJsonPath('data.description', 'Monthly retainer for consulting services');
+
+        $this->assertDatabaseHas('item_templates', [
+            'name' => 'Consulting',
+            'description' => 'Monthly retainer for consulting services',
+        ]);
+    }
+
+    public function test_description_is_optional_on_create(): void
+    {
+        $response = $this->postJson('/api/v1/item-templates', [
+            'name' => 'Hosting Fee',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.description', null);
+    }
+
+    public function test_description_max_1000_chars(): void
+    {
+        $response = $this->postJson('/api/v1/item-templates', [
+            'name' => 'Test',
+            'description' => str_repeat('a', 1001),
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['description']);
+    }
+
+    public function test_can_update_item_template_description(): void
+    {
+        $template = ItemTemplate::create(['name' => 'Old Name', 'description' => 'Old desc']);
+
+        $response = $this->putJson("/api/v1/item-templates/{$template->id}", [
+            'name' => 'Old Name',
+            'description' => 'New description',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.description', 'New description');
+
+        $this->assertDatabaseHas('item_templates', [
+            'id' => $template->id,
+            'description' => 'New description',
+        ]);
+    }
+
+    public function test_list_includes_description(): void
+    {
+        ItemTemplate::create(['name' => 'Hosting Fee', 'description' => 'Monthly hosting']);
+
+        $response = $this->getJson('/api/v1/item-templates');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.description', 'Monthly hosting');
+    }
 }
