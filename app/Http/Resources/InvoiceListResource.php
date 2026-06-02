@@ -19,6 +19,8 @@ class InvoiceListResource extends JsonResource
             'invoice_date' => $this->invoice_date?->format('Y-m-d'),
             'due_date' => $this->due_date?->format('Y-m-d'),
             'total' => (float) $this->total,
+            'use_unique_code' => (bool) $this->use_unique_code,
+            'unique_code' => $this->unique_code,
             'currency' => $this->currency,
             'status' => $this->status?->value ?? $this->status,
             'type' => $this->type?->value ?? $this->type,
