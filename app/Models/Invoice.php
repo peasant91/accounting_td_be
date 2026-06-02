@@ -158,6 +158,7 @@ class Invoice extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('invoice_number', 'like', "%{$search}%")
+                ->orWhereRaw("CAST(total AS TEXT) LIKE ?", ["%{$search}%"])
                 ->orWhereHas('customer', function ($cq) use ($search) {
                     $cq->where('name', 'like', "%{$search}%");
                 });
