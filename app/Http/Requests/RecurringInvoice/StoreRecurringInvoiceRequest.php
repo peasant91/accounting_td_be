@@ -33,6 +33,7 @@ class StoreRecurringInvoiceRequest extends FormRequest
             'currency' => ['required', 'string', 'size:3'],
             'due_date_offset' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string'],
+            'use_unique_code' => ['nullable', 'boolean'],
         ];
     }
 }

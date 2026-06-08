@@ -12,49 +12,70 @@ Route::prefix('v1')->group(function () {
 
     // Requires authentication
     Route::middleware('auth:sanctum')->group(function () {
-        // Auth
+        // Auth — all roles
         Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
         Route::get('/me', [\App\Http\Controllers\AuthController::class, 'me']);
 
-        // Dashboard
+        // Dashboard — all roles
         Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
-        // Customers
+        // Customers — full CRUD for all roles
         Route::apiResource('customers', CustomerController::class);
 
-        // Invoice Templates
-        Route::get('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'show']);
-        Route::put('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'update']);
-        Route::get('/customers/{customer}/invoice-template/preview', [InvoiceTemplateController::class, 'preview']);
-
-        // Invoices
-        Route::apiResource('invoices', InvoiceController::class);
-        Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send']);
-        Route::post('/invoices/{invoice}/resend', [InvoiceController::class, 'resend']);
-        Route::post('/invoices/{invoice}/send-reminder', [InvoiceController::class, 'sendReminder']);
-        Route::post('/invoices/{invoice}/mark-as-paid', [InvoiceController::class, 'markAsPaid']);
-        Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
+        // Invoices — read-only for all roles
+        Route::get('/invoices', [InvoiceController::class, 'index']);
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
         Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
 
-        // Recurring Invoices
+        // Invoice Templates — read-only for all roles
+        Route::get('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'show']);
+        Route::get('/customers/{customer}/invoice-template/preview', [InvoiceTemplateController::class, 'preview']);
+
+        // Recurring Invoices — read-only for all roles
         Route::get('/customers/{customer}/recurring-invoices', [\App\Http\Controllers\RecurringInvoiceController::class, 'index']);
-        Route::post('/recurring-invoices/{recurringInvoice}/generate', [\App\Http\Controllers\RecurringInvoiceController::class, 'manualGenerate']);
-        Route::apiResource('recurring-invoices', \App\Http\Controllers\RecurringInvoiceController::class)->except(['index', 'create', 'edit']);
+        Route::get('/recurring-invoices/{recurringInvoice}', [\App\Http\Controllers\RecurringInvoiceController::class, 'show']);
 
-        // Currency Rates
-        Route::get('/currency-rates', [\App\Http\Controllers\CurrencyRateController::class, 'index']);
-        Route::put('/currency-rates/{currency}', [\App\Http\Controllers\CurrencyRateController::class, 'upsert']);
+        // Admin + SuperAdmin: invoice writes, recurring writes, template writes, settings
+        Route::middleware(['role:super_admin,admin'])->group(function () {
+            // Invoice writes
+            Route::post('/invoices', [InvoiceController::class, 'store']);
+            Route::put('/invoices/{invoice}', [InvoiceController::class, 'update']);
+            Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy']);
+            Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send']);
+            Route::post('/invoices/{invoice}/resend', [InvoiceController::class, 'resend']);
+            Route::post('/invoices/{invoice}/send-reminder', [InvoiceController::class, 'sendReminder']);
+            Route::post('/invoices/{invoice}/mark-as-paid', [InvoiceController::class, 'markAsPaid']);
+            Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
 
-        // Admin management (super_admin only)
+            // Invoice Template write
+            Route::put('/customers/{customer}/invoice-template', [InvoiceTemplateController::class, 'update']);
+
+            // Recurring Invoice writes
+            Route::post('/recurring-invoices', [\App\Http\Controllers\RecurringInvoiceController::class, 'store']);
+            Route::put('/recurring-invoices/{recurringInvoice}', [\App\Http\Controllers\RecurringInvoiceController::class, 'update']);
+            Route::delete('/recurring-invoices/{recurringInvoice}', [\App\Http\Controllers\RecurringInvoiceController::class, 'destroy']);
+            Route::post('/recurring-invoices/{recurringInvoice}/generate', [\App\Http\Controllers\RecurringInvoiceController::class, 'manualGenerate']);
+
+            // Currency Rates
+            Route::get('/currency-rates', [\App\Http\Controllers\CurrencyRateController::class, 'index']);
+            Route::put('/currency-rates/{currency}', [\App\Http\Controllers\CurrencyRateController::class, 'upsert']);
+
+            // Item Templates
+            Route::get('/item-templates', [\App\Http\Controllers\ItemTemplateController::class, 'index']);
+            Route::post('/item-templates', [\App\Http\Controllers\ItemTemplateController::class, 'store']);
+            Route::put('/item-templates/{itemTemplate}', [\App\Http\Controllers\ItemTemplateController::class, 'update']);
+            Route::delete('/item-templates/{itemTemplate}', [\App\Http\Controllers\ItemTemplateController::class, 'destroy']);
+        });
+
+        // SuperAdmin only
         Route::middleware(['role:super_admin'])->group(function () {
             Route::apiResource('admins', \App\Http\Controllers\AdminController::class)
                 ->parameters(['admins' => 'admin']);
-        });
 
-        // Audit
-        Route::prefix('audit')->group(function () {
-            Route::get('/activity', [\App\Http\Controllers\AuditController::class, 'activity']);
-            Route::get('/login-attempts', [\App\Http\Controllers\AuditController::class, 'loginAttempts']);
+            Route::prefix('audit')->group(function () {
+                Route::get('/activity', [\App\Http\Controllers\AuditController::class, 'activity']);
+                Route::get('/login-attempts', [\App\Http\Controllers\AuditController::class, 'loginAttempts']);
+            });
         });
     });
 });

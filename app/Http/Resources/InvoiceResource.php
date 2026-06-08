@@ -21,6 +21,8 @@ class InvoiceResource extends JsonResource
             'tax_rate' => (float) $this->tax_rate,
             'tax_amount' => (float) $this->tax_amount,
             'total' => (float) $this->total,
+            'use_unique_code' => (bool) $this->use_unique_code,
+            'unique_code' => $this->unique_code,
             'status' => $this->status?->value ?? $this->status,
             'type' => $this->type?->value ?? $this->type,
             'recurring_invoice_id' => $this->recurring_invoice_id,

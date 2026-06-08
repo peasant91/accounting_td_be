@@ -35,4 +35,52 @@ class RoleGuardTest extends TestCase
     {
         $this->getJson('/test-super-only')->assertUnauthorized();
     }
+
+    public function test_sales_user_cannot_create_invoice(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->postJson('/api/v1/invoices', [])
+            ->assertForbidden();
+    }
+
+    public function test_sales_user_cannot_delete_invoice(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->deleteJson('/api/v1/invoices/1')
+            ->assertForbidden();
+    }
+
+    public function test_sales_user_can_list_invoices(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->getJson('/api/v1/invoices')
+            ->assertOk();
+    }
+
+    public function test_sales_user_can_crud_customers(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->getJson('/api/v1/customers')
+            ->assertOk();
+    }
+
+    public function test_sales_user_cannot_access_audit(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->getJson('/api/v1/audit/activity')
+            ->assertForbidden();
+    }
+
+    public function test_sales_user_cannot_access_currency_rates_write(): void
+    {
+        $user = User::factory()->sales()->create();
+        $this->actingAs($user)
+            ->putJson('/api/v1/currency-rates/USD', ['rate' => 1.0])
+            ->assertForbidden();
+    }
 }

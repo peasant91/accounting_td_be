@@ -87,6 +87,7 @@ class InvoiceService
                 'status' => InvoiceStatus::Draft,
                 'type' => $data['type'] ?? InvoiceType::Manual,
                 'recurring_invoice_id' => $data['recurring_invoice_id'] ?? null,
+                'use_unique_code' => $data['use_unique_code'] ?? false,
             ]);
 
             // Create items
@@ -112,6 +113,7 @@ class InvoiceService
                 'tax_rate' => $data['tax_rate'] ?? $invoice->tax_rate,
                 'notes' => $data['notes'] ?? $invoice->notes,
                 'internal_notes' => $data['internal_notes'] ?? $invoice->internal_notes,
+                'use_unique_code' => $data['use_unique_code'] ?? $invoice->use_unique_code,
             ]);
 
             // Update items if provided

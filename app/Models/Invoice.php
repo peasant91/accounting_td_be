@@ -27,6 +27,7 @@ class Invoice extends Model
         'tax_rate',
         'tax_amount',
         'total',
+        'use_unique_code',
         'status',
         'notes',
         'internal_notes',
@@ -49,6 +50,7 @@ class Invoice extends Model
         'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total' => 'decimal:2',
+        'use_unique_code' => 'boolean',
     ];
 
     /**
@@ -107,6 +109,12 @@ class Invoice extends Model
         return $this->status === InvoiceStatus::Draft;
     }
 
+    public function getUniqueCodeAttribute(): int
+    {
+        $parts = explode('-', $this->invoice_number);
+        return (int) end($parts);
+    }
+
     /**
      * Get available actions based on status.
      */
@@ -150,6 +158,7 @@ class Invoice extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('invoice_number', 'like', "%{$search}%")
+                ->orWhereRaw("CAST(total AS TEXT) LIKE ?", ["%{$search}%"])
                 ->orWhereHas('customer', function ($cq) use ($search) {
                     $cq->where('name', 'like', "%{$search}%");
                 });

@@ -11,9 +11,15 @@ class ActivityIndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_regular_admin_can_view(): void
+    public function test_regular_admin_forbidden(): void
     {
         $u = User::factory()->create();
+        $this->actingAs($u)->getJson('/api/v1/audit/activity')->assertForbidden();
+    }
+
+    public function test_super_admin_can_view(): void
+    {
+        $u = User::factory()->superAdmin()->create();
         $this->actingAs($u)->getJson('/api/v1/audit/activity')->assertOk();
     }
 
@@ -24,7 +30,7 @@ class ActivityIndexTest extends TestCase
 
     public function test_filter_by_action(): void
     {
-        $u = User::factory()->create();
+        $u = User::factory()->superAdmin()->create();
         $this->actingAs($u);
 
         ActivityLog::create(['action' => 'customer.created', 'user_id' => $u->id, 'properties' => []]);
@@ -37,7 +43,7 @@ class ActivityIndexTest extends TestCase
 
     public function test_filter_by_user_id(): void
     {
-        $alice = User::factory()->create();
+        $alice = User::factory()->superAdmin()->create();
         $bob = User::factory()->create();
         ActivityLog::create(['action' => 'x', 'user_id' => $alice->id, 'properties' => []]);
         ActivityLog::create(['action' => 'x', 'user_id' => $bob->id, 'properties' => []]);
