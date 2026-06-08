@@ -18,7 +18,7 @@ class LoginAttemptsIndexTest extends TestCase
 
     public function test_filter_by_email(): void
     {
-        $u = User::factory()->create();
+        $u = User::factory()->superAdmin()->create();
         LoginAttempt::create(['email' => 'a@x.com', 'ip_address' => '1.1.1.1', 'successful' => true, 'attempted_at' => now()]);
         LoginAttempt::create(['email' => 'b@x.com', 'ip_address' => '1.1.1.1', 'successful' => false, 'attempted_at' => now()]);
 
@@ -28,7 +28,7 @@ class LoginAttemptsIndexTest extends TestCase
 
     public function test_filter_by_successful(): void
     {
-        $u = User::factory()->create();
+        $u = User::factory()->superAdmin()->create();
         LoginAttempt::create(['email' => 'a@x.com', 'ip_address' => '1.1.1.1', 'successful' => true, 'attempted_at' => now()]);
         LoginAttempt::create(['email' => 'b@x.com', 'ip_address' => '1.1.1.1', 'successful' => false, 'attempted_at' => now()]);
 
