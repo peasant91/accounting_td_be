@@ -20,6 +20,7 @@ class ActivityLog extends Model
     ];
 
     protected $casts = [
+        'loggable_id' => 'integer',
         'properties' => 'array',
         'created_at' => 'datetime',
     ];
